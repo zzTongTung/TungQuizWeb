@@ -1,0 +1,45 @@
+# 依赖目录
+node_modules/
+
+# 环境配置文件
+.env
+.env.local
+.env.*.local
+
+# 日志文件
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 运行时数据
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# 目录
+dist/
+build/
+coverage/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE 和编辑器文件
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
+
+# npm 包锁定文件（根据需要可以注释掉）
+# package-lock.json
+# yarn.lock
+
+# 临时文件
+.tmp/
+.temp/ 
