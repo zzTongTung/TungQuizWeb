@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quiz website</title>
+    <link rel="stylesheet" href="root_style.css">
+</head>
+
+<body class="bg">
+    <!-- header -->
+    <header id="header">
+        <a href="#header" class="logo">My Website</a>
+        <ul>
+            <li><a href="#about-me">More</a></li>
+            <li><a href="about.html">About Me</a></li>
+        </ul>
+    </header>
+
+    <section>
+        <h2 id="text"><span>click on the button to start the </span><br>challenge</h2>
+
+        <img src="img/boy.png" alt="" id="boy">
+        <img src="img/girl.png" alt="" id="girl">
+        <img src="img/background3.png" alt="" id="image3">
+
+        <a href="#" id="btn">GAME START</a>
+        <div id="nameModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="bookmark-tabs">
+                    <div class="bookmark-tab" id="boyTab">Boy</div>
+                    <div class="bookmark-tab" id="girlTab">Girl</div>
+                </div>
+                <div class="modal-inner">
+                    <div id="boy_ava" class="avatar">
+                        <img src="img/boy_ava.jpg" alt="Boy Avatar">
+                    </div>
+                    <div id="girl_ava" class="avatar">
+                        <img src="img/girl_ava.jpg" alt="Girl Avatar">
+                    </div>
+                    <h2>Your player name</h2>
+                    <input type="text" id="playerName" placeholder="Player Name">
+                    <h2>Your self-introduction<br>(Optional)</h2>
+                    <input type="text" id="selfIntroduction" placeholder="Self-Introduction">
+                    <button id="submitName">Submit</button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- main content -->
+    <div class="container" id="about-me">
+        <h2>About Website</h2>
+        <p>Hello! It's an honor to have you here. I'm Tung, this web's developer and designer. Thank you for visiting my website. This is a quiz-challenge website. Just a gentle click on the "Start" button will set you on a challenging journey. The main purpose of this website is to provide a fun and interactive way for people to learn about the basics of common sense of life.  
+        <br>You can learn more about me by clicking on the "About" link in the header. Or if you want to play a game, click on the "Game" link in the header or click on the "GAME START" button below.  
+        <br>If you happen to notice any flaws or bugs during your use, please feel free to <a href="mailto:2904317537@qq.com">reach out to me via email</a>.  
+        <br>Next, I will provide you with some game instructions.  
+        </p>
+        <div class="card-container">
+            <!-- About Page Card -->
+            <div class="card">
+                <div class="card-slider">
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/aboutImage.png" alt="About Page 1">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">About Page - Page Guidance</div>
+                            <div class="card-text">On the root page, in the top header, find the button labeled "About Me" and click it to enter the personal introduction page. Once in, there is a navigation bar on the left side of the page. You can either click on the options in the navigation bar for quick jumps to view content or scroll the page up and down to browse the information.</div>
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/aboutMore.png" alt="About Page 2">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">About Page - Content</div>
+                            <div class="card-text">The About page shows personal info, student activities, course work, math modeling awards, and skill proficiency bars.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-buttons">
+                    <button class="prev">&lt;</button>
+                    <button class="next">&gt;</button>
+                </div>
+            </div>
+
+            <!-- Match Page Card -->
+            <div class="card">
+                <div class="card-slider">
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/playerInfo.png" alt="Match Page 1">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">Registration Page Instructions</div>
+                            <div class="card-text">On the root page modal, select "Boy" or "Girl" for avatar gender (default is "Boy" if not selected). Then enter your player name in the input field, optionally add self - introduction, and click "Submit". Info will transfer to match page.</div>
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/matchImage.png" alt="Match Page 2">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">Match Page - Initiating a Challenge</div>
+                            <div class="card-text">After entering the match page, you'll see the information of other challengers. If you want to challenge a certain challenger, click the "challenge" button on the corresponding card.</div>
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/matchAccept.png" alt="Match Page 3">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">Match Page - Receiving a Challenge</div>
+                            <div class="card-text">When another player challenges you, a modal will pop up asking if you accept the challenge. Click the "Accept" button to accept the challenge, and click the "Reject" button to reject it.</div>
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/matchReject.png" alt="Match Page 4">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">Match Page - Rejecting a Challenge</div>
+                            <div class="card-text">If the other party rejects the challenge, a prompt that the challenge has been rejected will be displayed in the black box at the top of your interface.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-buttons">
+                    <button class="prev">&lt;</button>
+                    <button class="next">&gt;</button>
+                </div>
+            </div>
+
+            <!-- Quiz Page Card -->
+            <div class="card">
+                <div class="card-slider">
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/gameWaiting.png" alt="Quiz Page 1">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">Quiz Page - Preparation Stage</div>
+                            <div class="card-text">After entering the quiz page, the page status will show "Preparing...". At this time, the system is preparing for the game, and you just need to wait for a while.</div>
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/gamePro(1).png" alt="Quiz Page 2">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">Quiz Page -  Game-in-Progress Stage</div>
+                            <div class="card-text">After preparation is complete, a ten - second countdown will start. When the countdown ends, the page status changes to "Game in progress", and the questions will be loaded. You need to choose the answer you think is correct from the options below.</div>
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/gameEnd.png" alt="Quiz Page 3">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">Quiz Page - End-of-Game Stage</div>
+                            <div class="card-text">After all questions are answered, the page status will change to "Game over". The system will calculate your score and display it on the page. You can click on the "Back to Start" button to return to match page and play again or click on the "Home" button to return to the root page.</div>
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <div class="card-image">
+                            <img src="img/introWeb/gameGuide.png" alt="Quiz Page 3">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">Quiz Page - End-of-Game Stage</div>
+                            <div class="card-text">When you move the mouse to header, you can see the guide and return to the root or about page by clicking on the corresponding buttons. The system will notify your opponent after you leave.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-buttons">
+                    <button class="prev">&lt;</button>
+                    <button class="next">&gt;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <footer class="bg-white shadow-md mt-8">
+        <div class="container mx-auto px-4 py-3 text-center text-gray-600">
+            &copy; 2025 Tung's Website. All rights reserved.
+        </div>
+    </footer>
+
+
+    <script>
+      let socket;
+      try {
+        socket = io();
+        socket.on('connect', () => {
+          console.log('Connected to server');
+        });
+        socket.on('connect_error', (err) => {
+          console.error('Socket.IO connection error:', err);
+        });
+      } catch (e) {
+        console.error('Failed to initialize Socket.IO:', e);
+      };
+
+      window.onload = function() {
+        let selectAva = 'boy_ava';
+        const boyTab = document.getElementById('boyTab');
+        const girlTab = document.getElementById('girlTab');
+        const boyAva = document.getElementById('boy_ava');
+        const girlAva = document.getElementById('girl_ava');
+
+        boyTab.addEventListener('click', function() {
+          activateAvatar('boy_ava', boyTab);
+        });
+
+        girlTab.addEventListener('click', function() {
+          activateAvatar('girl_ava', girlTab);
+        });
+
+        function activateAvatar(avatarId, tabElement) {
+          boyAva.style.display = 'none';
+          girlAva.style.display = 'none';
+          
+          document.getElementById(avatarId).style.display = 'block';
+          document.querySelectorAll('.bookmark-tab').forEach(tab => {
+            tab.classList.remove('active');
+          });
+          tabElement.classList.add('active');
+          selectAva = avatarId; 
+          console.log('Selected:', selectAva);
+        }
+
+        const headerText = document.getElementById("text");
+        const startButton = document.getElementById("btn");
+        const nameModal = document.getElementById('nameModal');
+        const closeButton = document.querySelector('.close');
+        const submitButton = document.getElementById('submitName');
+        const boyImage = document.getElementById("boy");
+        const girlImage = document.getElementById("girl");
+
+        window.addEventListener("scroll", function () {
+            const scrollValue = window.scrollY;
+            headerText.style.top = 52 + scrollValue * -.1 + '%';
+            startButton.style.top = scrollValue * 1.5 + "px";
+            boyImage.style.top = scrollValue * -1.5 + "px";
+            boyImage.style.left = scrollValue * 0.7 + "px";
+            girlImage.style.top = scrollValue * -1.5 + "px";
+            girlImage.style.right = scrollValue * -5.5 + "px";
+        });
+
+        startButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            nameModal.style.display = 'block';
+        });
+
+        closeButton.addEventListener('click', function () {
+            nameModal.style.display = 'none';
+        });
+
+        submitButton.addEventListener('click', function () {
+            const playerName = document.getElementById('playerName').value;
+            const selfIntroduction = document.getElementById('selfIntroduction').value;
+            const activeTab = document.querySelector('.bookmark-tab.active');
+            if (playerName && selectAva) {
+                const existingData = JSON.parse(localStorage.getItem('playerData')) || [];
+                existingData.push({ name: playerName, desc: selfIntroduction || '', avatar: selectAva });
+                localStorage.setItem('playerData', JSON.stringify(existingData));
+                console.log('The player name you submitted is:', playerName);
+                console.log('The selected avatar is:', selectAva);
+                nameModal.style.display = 'none';
+                window.location.href = 'match_page.html';
+            } else {
+                if (!playerName) {
+                    alert('Please enter your name.');
+                }
+                if (!selectAva) {
+                    alert('Please select an avatar.');
+                }
+            }
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target === nameModal) {
+                nameModal.style.display = 'none';
+            }
+        });
+
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const slides = card.querySelectorAll('.slide');
+            const prevButton = card.querySelector('.prev');
+            const nextButton = card.querySelector('.next');
+            let currentIndex = 0;
+
+            function showSlide(index) {
+                slides.forEach(slide => slide.classList.remove('active'));
+                slides[index].classList.add('active');
+            }
+
+            prevButton.addEventListener('click', function() {
+                currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+                showSlide(currentIndex);
+            });
+
+            nextButton.addEventListener('click', function() {
+                currentIndex = (currentIndex + 1) % slides.length;
+                showSlide(currentIndex);
+            });
+
+            showSlide(currentIndex);
+        });
+    };
+    </script>
+</body>
+
+</html>

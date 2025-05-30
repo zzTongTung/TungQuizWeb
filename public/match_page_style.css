@@ -1,0 +1,156 @@
+:root {
+  --primary-color: #8A2BE2;
+}
+
+body {
+  background-color: blueviolet;
+  background-image: url('img/mp-background.png');
+  background-size: contain;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.user-list-container {
+  width: 60%;
+  height: 500px;
+  overflow: auto;
+  border: 1px solid #ccc;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-image: url('img/match_main_page.png');
+  background-clip: content-box;
+  background-origin: content-box;
+  padding: 0px;
+  border-radius: 25px;
+  position: relative;
+  box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.3);
+  margin: 100px auto;
+}
+
+.challenge-label {
+  position: absolute;
+  background-color: black;
+  color: white;
+  padding: 20px 30px;
+  border-radius: 50px;
+  font-size: 30px;
+  top: 170px;
+  left: 350px;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin: 10px 30px;
+  background: linear-gradient(90deg, #66ccff, #ffff66);
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 15px;
+}
+
+.user-info:first-child {
+  margin-top: 50px;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+  background-color: #ccc;
+  background-size: cover;
+  background-position: center;
+}
+
+.user-name {
+  flex: 1;
+}
+
+.user-desc {
+  flex:2;
+  font-size: 12px;
+  color: #666;
+}
+
+.challenge-button {
+  padding: 10px 25px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.challenge-button:hover {
+  background-color: #555;
+}
+
+#challengeModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color:  var(--primary-color);
+  border-radius: 15px; 
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-header h2 {
+  color: #333;
+  font-family: Arial, sans-serif;
+  font-size: 24px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.modal-body {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.modal-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.accept {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.accept:hover {
+  background-color: #45a049;
+}
+
+.reject {
+  background-color: #f44336;
+  color: white;
+}
+
+.reject:hover {
+  background-color: #e53935;
+}

@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Game Page</title>
+    <link rel="stylesheet" href="quiz-game.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-guide">
+          <a href="#header" class="logo">My Website</a>
+          <ul>
+              <li><a href="root.html">Back to Home</a></li>
+              <li><a href="about.html">About Me</a></li>
+          </ul>
+        </div>
+        <div class="user-info">
+            <img src="img/boy_ava.jpg" alt="my-avatar" class="avatar">
+            <div class="user-text">
+                <p class="name">My Name</p>
+            </div>
+        </div>
+        <div class="pk-text">VS</div>
+        <div class="opponent-info">
+            <img src="img/girl_ava.jpg" alt="opponent-avatar" class="avatar">
+            <div class="opponent-text">
+                <p class="name">Opponent Name</p>
+            </div>
+        </div>
+    </header>
+    <div class="game-status-banner">
+        <div class="banner-content">
+            <div class="status-info">
+                <h2 class="status-title" id="countdownDisplay">Preparing...</h2>
+                <p class="status-desc">Compete for the title of Knowledge Champion</p>
+            </div>
+            <div class="progress-timer">
+                <div class="question-progress">
+                    <span class="progress-text">Question 1/5</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <main class="main">
+        <div id="gameContainer">
+            <div class="question-container">
+                <p class="question" id="question">Question</p>
+                <div id="answerFeedback" class="answer-feedback" style="display: none;"></div>
+            </div>
+            <div class="image-container">
+                <img id="questionImage" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Question Image" style="display: none;">
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <button class="answer-btn">Answer 1</button>
+        <button class="answer-btn">Answer 2</button>
+        <button class="answer-btn">Answer 3</button>
+    </footer>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+            <div id="modalHeader" class="modal-header calculating">
+                <h2 id="modalTitle">Calculating Results...</h2>
+            </div>
+            <div class="modal-body">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                </div>
+                <div class="players-info">
+                    <div class="player-info">
+                        <img id="myAvatarResult" src="img/boy_ava.jpg" alt="Your avatar" class="avatar">
+                        <p id="myNameResult" class="name">My Name</p>
+                    </div>
+                    <div class="vs-text">VS</div>
+                    <div class="player-info">
+                        <img id="opponentAvatarResult" src="img/girl_ava.jpg" alt="Opponent avatar" class="avatar">
+                        <p id="opponentNameResult" class="name">Opponent Name</p>
+                    </div>
+                </div>
+                <p id="resultMessage">Please wait while we calculate the scores.</p>
+                <div class="score-display" style="display: none;">
+                    <p><span id="yourScoreText">Your Score:</span> <span id="yourFinalScore">0</span></p>
+                    <p><span id="opponentScoreText">Opponent Score:</span> <span id="opponentFinalScore">0</span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnRematch" class="btn btn-rematch">Back to Start</button>
+                <button id="btnExit" class="btn btn-exit">Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="offlineModal" class="modal">
+        <div class="modal-content">
+            <span id="closeOfflineModal" class="close">&times;</span>
+            <div class="modal-header">
+                <h2>Connection Lost</h2>
+            </div>
+            <div class="modal-body">
+                <p>Your connection to the server has been lost. Please check your network and try to reconnect.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btnTryReconnect" class="btn btn-try-reconnect">Try to Reconnect</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="exitGameModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeExitModal">&times;</span>
+        <div class="modal-header">
+          <h2>Exit Game</h2>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to exit the game? This will terminate your current match.</p>
+        </div>
+        <div class="modal-footer">
+          <button id="confirmExitBtn" class="btn btn-exit">Confirm Exit</button>
+          <button id="cancelExitBtn" class="btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+<script>
+    let roomId = null;
+    let opponentName = null;
+    let myPlayerData = null;
+    let answers = [];
+    let currentQuestionIndex = 0;
+    let isGamePaused = false;
+    let socket = null;
+    let gameStartTimeout;
+    let countdownInterval;
+    let gameEndTimeout;
+    let countdownSeconds = 10;
+    let match_id = null;
+    let myScore = 0;
+    let opponentScore = 0;
+    let isGameStarted = false;
+
+    const elements = {
+        myScore: document.getElementById('myScore'),
+        opponentScore: document.getElementById('opponentScore'),
+        question: document.getElementById('question'),
+        progressText: document.querySelector('.progress-text'),
+        resultModal: document.getElementById('resultModal'),
+        modalHeader: document.getElementById('modalHeader'),
+        modalTitle: document.getElementById('modalTitle'),
+        yourFinalScore: document.getElementById('yourFinalScore'),
+        opponentFinalScore: document.getElementById('opponentFinalScore'),
+        resultMessage: document.getElementById('resultMessage'),
+        closeModal: document.getElementById('closeModal'),
+        btnRematch: document.getElementById('btnRematch'),
+        btnExit: document.getElementById('btnExit'),
+        offlineModal: document.getElementById('offlineModal'),
+        closeOfflineModal: document.getElementById('closeOfflineModal'),
+        btnTryReconnect: document.getElementById('btnTryReconnect'),
+        userInfoName: document.querySelector('.user-info .name'),
+        userInfoAvatar: document.querySelector('.user-info .avatar'),
+        opponentInfoName: document.querySelector('.opponent-info .name'),
+        opponentInfoAvatar: document.querySelector('.opponent-info .avatar'),
+        loadingSpinner: document.querySelector('.loading-spinner'),
+        scoreDisplay: document.querySelector('.score-display'),
+        countdownDisplay: document.getElementById('countdownDisplay')
+    };
+
+    window.addEventListener('unhandledrejection', (event) => {
+        console.error('[Global] Unhandled Promise rejection:', event.reason);
+        event.preventDefault();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('[DEBUG] DOMContentLoaded event fired');
+
+        function handleNavigationClick(event, targetUrl) {
+            event.preventDefault();
+            const isGameActive = isGameStarted || (match_id && elements.countdownDisplay.textContent !== 'Preparing...');
+            
+            if (isGameActive) {
+                showExitGameModal(() => {
+                    if (socket && socket.connected && match_id) {
+                        console.log('[DEBUG] Sending leaveGame event:', {
+                            match_id,
+                            playerName: myPlayerData.name
+                        });
+                        
+                        socket.emit('leaveGame', {
+                            match_id,
+                            playerName: myPlayerData.name
+                        });
+
+                        setTimeout(() => {
+                            socket.disconnect();
+                            localStorage.removeItem('match_id');
+                            localStorage.removeItem('currentRoomId');
+                            localStorage.removeItem('opponentName');
+                            window.location.href = targetUrl;
+                        }, 200);
+                    } else {
+                        console.log('[DEBUG] Socket not connected or no match_id');
+                        window.location.href = targetUrl;
+                    }
+                });
+            } else {
+                window.location.href = targetUrl;
+            }
+        }
+
+        // load player
+        const playerDataStr = localStorage.getItem('playerData');
+        myPlayerData = {
+            name: localStorage.getItem('playerName') || 'Player',
+            avatar: 'boy_ava'
+        };
+        if (playerDataStr) {
+            try {
+                const storedData = JSON.parse(playerDataStr);
+                if (Array.isArray(storedData) && storedData.length > 0) {
+                    const lastPlayerData = storedData[storedData.length - 1];
+                    myPlayerData.name = lastPlayerData.name;
+                    myPlayerData.avatar = lastPlayerData.avatar;
+                }
+            } catch (error) {
+                console.warn('Failed to parse player data, using defaults:', error);
+            }
+        }
+
+        // update user info
+        if (elements.userInfoName) elements.userInfoName.textContent = myPlayerData.name;
+        if (elements.userInfoAvatar) elements.userInfoAvatar.src = `img/${myPlayerData.avatar}.jpg`;
+
+        const opponentNameFromStorage = localStorage.getItem('opponentName');
+        const opponentAvatarFromStorage = localStorage.getItem('opponentAvatar');
+        opponentName = opponentNameFromStorage || 'Anonymous Opponent';
+        const opponentAvatar = opponentAvatarFromStorage || 'girl_ava';
+        
+        if (opponentNameFromStorage) {
+            if (elements.opponentInfoName) elements.opponentInfoName.textContent = opponentName;
+            if (elements.opponentInfoAvatar) elements.opponentInfoAvatar.src = `img/${opponentAvatar}.jpg`;
+        }
+
+        setupModalEventListeners();
+        setupNavigationListeners();
+
+        // init game
+        if (elements.countdownDisplay) {
+            elements.countdownDisplay.textContent = 'Preparing...';
+        }
+
+        // create socket
+        socket = createSocketConnection(myPlayerData);
+        setupSocketEventListeners(socket);
+
+        if (socket.connected) {
+            initGame();
+        } else {
+            socket.once('connect', () => {
+                initGame();
+            });
+        }
+    });
+
+    function createSocketConnection(playerData) {
+        console.log('[DEBUG] Creating socket connection with player data:', playerData);
+        const socket = io({
+            transports: ['websocket'],
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 10000,
+            randomizationFactor: 0.5,
+            timeout: 30000,
+            autoConnect: true
+        });
+
+        socket.on('connect', () => {
+            console.log('[DEBUG] Socket connected');
+            hideConnectionStatus();
+            hideOfflineModal();
+            socket.emit('playerConnect', playerData);
+            socket.emit('playerOnline', playerData);
+            
+            // localStorage
+            match_id = localStorage.getItem('match_id');
+            const storedPlayerName = myPlayerData.name;
+            console.log('[DEBUG] Current match data from localStorage:', { 
+                match_id, 
+                playerName: storedPlayerName 
+            });
+            
+            if (match_id && storedPlayerName) {
+                console.log('[DEBUG] Attempting to rejoin match:', match_id);
+                socket.emit('rejoinRoom', {
+                    match_id: match_id,
+                    playerName: storedPlayerName
+                });
+            }
+        });
+
+        socket.on('rejoinFailed', (data) => {
+            console.log('[DEBUG] Rejoin failed:', data);
+            
+            if (data.reason === 'wrongMatch' && data.correctMatchId) {
+                console.log('[DEBUG] Found correct match:', data.correctMatchId);
+                localStorage.setItem('match_id', data.correctMatchId);
+                socket.emit('rejoinRoom', {
+                    match_id: data.correctMatchId,
+                    playerName: myPlayerData.name
+                });
+                return;
+            }
+            
+            // clear
+            localStorage.removeItem('match_id');
+            localStorage.removeItem('opponentName');
+            
+            if (data.reason === 'matchNotFound' || data.reason === 'matchExpired') {
+                console.log('[DEBUG] Match not found or expired, requesting new room');
+                socket.emit('requestRoom', myPlayerData);
+            } else {
+                alert(data.message || 'Failed to rejoin match. Starting new game...');
+                window.location.href = 'match_page.html';
+            }
+        });
+
+        socket.on('rejoinSuccess', (data) => {
+            console.log('[DEBUG] Rejoin success:', data);
+            match_id = data.match_id;
+            opponentName = data.opponentName;
+            
+            if (elements.opponentInfoName) {
+                elements.opponentInfoName.textContent = opponentName;
+            }
+            
+            // update state
+            currentQuestionIndex = data.currentQuestion || 0;
+            myScore = data.scores[myPlayerData.name] || 0;
+            opponentScore = data.scores[opponentName] || 0;
+            
+            if (data.answers) {
+                answers = data.answers;
+            }
+            
+            if (data.gameStarted) {
+                isGameStarted = true;
+                loadQuestion(currentQuestionIndex);
+            } else {
+                startCountdown();
+            }
+        });
+
+        socket.on('joinRoom', (receivedRoomId) => {
+            console.log('[DEBUG] Joined room:', receivedRoomId);
+            roomId = receivedRoomId;
+            localStorage.setItem('currentRoomId', roomId);
+            if (gameStartTimeout) clearTimeout(gameStartTimeout);
+            gameStartTimeout = setTimeout(() => {
+                if (!roomId) return;
+                if (!opponentName) {
+                    opponentName = 'Anonymous Opponent';
+                    if (elements.opponentInfoName) elements.opponentInfoName.textContent = opponentName;
+                    localStorage.setItem('opponentName', opponentName);
+                }
+                handleGameStart({
+                    roomId: roomId,
+                    opponentName: opponentName,
+                    gameStarted: true,
+                    currentQuestion: 0,
+                    scores: { [myPlayerData.name]: 0, [opponentName]: 0 }
+                });
+            }, 10000);
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('[DEBUG] Socket connection error:', error);
+            showConnectionStatus('Failed to connect to server, check your network');
+            showOfflineModal();
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('[DEBUG] Socket disconnected:', reason);
+            showConnectionStatus('Disconnected, trying to reconnect...');
+            showOfflineModal();
+            if (reason === 'io server disconnect') {
+                setTimeout(() => {
+                    socket.connect();
+                }, 3000);
+            }
+        });
+
+        socket.on('reconnect', (attemptNumber) => {
+            console.log('[DEBUG] Socket reconnected after', attemptNumber, 'attempts');
+            hideConnectionStatus();
+            hideOfflineModal();
+            socket.emit('playerConnect', playerData);
+            socket.emit('playerOnline', playerData);
+            tryRejoinOrRequestMatch(socket, playerData);
+        });
+
+        socket.on('gameStart', (data) => {
+            console.log('[DEBUG] Game started with data:', data);
+            clearTimeout(gameStartTimeout);
+            handleGameStart(data);
+        });
+
+        socket.on('gameEnd', handleGameEnd);
+        socket.on('opponentDisconnected', handleOpponentDisconnected);
+        socket.on('opponentReconnected', handleOpponentReconnected);
+        socket.on('roomClosed', handleRoomClosed);
+        socket.on('answerResult', (data) => {
+            console.log('[DEBUG] Received answer result:', data);
+            const { questionIndex, isCorrect, scores } = data;
+            if (questionIndex === currentQuestionIndex) {
+                showAnswerFeedback(isCorrect);
+                const answer = answers.find(a => a.questionIndex === questionIndex);
+                if (answer) {
+                    answer.isCorrect = isCorrect;
+                }
+                
+                if (scores) {
+                    myScore = scores[myPlayerData.name] || 0;
+                    opponentScore = scores[opponentName] || 0;
+                }
+                
+                // delay question
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < 5) {
+                        loadQuestion(currentQuestionIndex);
+                    } else {
+                        console.log('[DEBUG] Game complete, submitting final results');
+                        socket.emit('submitGameResult', {
+                            match_id,
+                            playerName: myPlayerData.name,
+                            answers,
+                            finalScore: myScore
+                        });
+                    }
+                }, 3000);
+            }
+        });
+
+        socket.on('matchSuccess', (data) => {
+            console.log('[DEBUG] Match success:', data);
+            match_id = data.match_id;
+            opponentName = data.opponent;
+            
+            // Store match data in localStorage
+            localStorage.setItem('match_id', match_id);
+            localStorage.setItem('opponentName', opponentName);
+            localStorage.setItem('playerName', myPlayerData.name);  // Store player's name
+            
+            console.log('[DEBUG] Stored match data:', { match_id, opponentName, playerName: myPlayerData.name });
+            
+            // Update opponent info display
+            if (elements.opponentInfoName) {
+                elements.opponentInfoName.textContent = opponentName;
+            }
+            
+            // Reset game state
+            currentQuestionIndex = 0;
+            answers = [];
+            myScore = 0;
+            opponentScore = 0;
+            isGameStarted = false;
+            
+            // Start the game
+            initGame();
+        });
+
+        socket.on('gameResult', (data) => {
+            console.log('[DEBUG] Received game result:', data);
+            const { scores, winner, error } = data;
+            
+            if (error) {
+                console.error('[ERROR] Game result error:', error);
+                showResultModal('Error: ' + error);
+                return;
+            }
+            
+            // update element
+            if (elements.loadingSpinner) {
+                elements.loadingSpinner.style.display = 'none';
+            }
+            if (elements.scoreDisplay) {
+                elements.scoreDisplay.style.display = 'block';
+            }
+            
+            let resultMessage;
+            let headerClass;
+            
+            if (winner === 'tie') {
+                resultMessage = "It's a Tie!";
+                headerClass = 'tie';
+            } else if (winner === myPlayerData.name) {
+                resultMessage = 'You Win!';
+                headerClass = 'win';
+            } else if (winner === opponentName) {
+                resultMessage = 'You Lose!';
+                headerClass = 'lose';
+            }
+            
+            // modal
+            if (elements.modalTitle) elements.modalTitle.textContent = resultMessage;
+            if (elements.modalHeader) elements.modalHeader.className = `modal-header ${headerClass}`;
+            if (elements.resultMessage) {
+                if (winner === 'tie') {
+                    elements.resultMessage.textContent = 'Both players have the same score! Great match!';
+                } else if (winner === myPlayerData.name) {
+                    elements.resultMessage.textContent = 'Congratulations! You are the knowledge champion!';
+                } else {
+                    elements.resultMessage.textContent = `${opponentName} wins the match!`;
+                }
+            }
+            
+            showResultModal(resultMessage, scores);
+        });
+
+        socket.on('answerConfirmed', (data) => {
+            console.log('[DEBUG] Answer confirmed:', data);
+            const { questionIndex, isCorrect } = data;
+            
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            showAnswerFeedback(isCorrect);
+            
+            const answer = answers.find(a => a.questionIndex === questionIndex);
+            if (answer) {
+                answer.isCorrect = isCorrect;
+            }
+        });
+
+        return socket;
+    }
+
+    function tryRejoinOrRequestMatch(socket, playerData) {
+        console.log('[DEBUG] Trying to rejoin or request match');
+        const savedRoomId = localStorage.getItem('currentRoomId');
+        const savedOpponentName = localStorage.getItem('opponentName');
+        if (savedOpponentName) {
+            opponentName = savedOpponentName;
+            if (elements.opponentInfoName) elements.opponentInfoName.textContent = opponentName;
+        }
+        if (savedRoomId) {
+            console.log('[DEBUG] Attempting to rejoin room:', savedRoomId);
+            socket.emit('rejoinRoom', {
+                roomId: savedRoomId,
+                playerName: playerData.name
+            });
+        } else {
+            console.log('[DEBUG] Requesting new room');
+            socket.emit('requestRoom', playerData);
+        }
+    }
+
+    function handleGameStart(data) {
+        console.log('[DEBUG] Handling game start with data:', data);
+        roomId = data.roomId;
+        opponentName = data.opponentName;
+        localStorage.setItem('currentRoomId', roomId);
+        localStorage.setItem('opponentName', opponentName);
+        const opponentAvatarFromStorage = localStorage.getItem('opponentAvatar') || 'girl_ava';
+        if (elements.opponentInfoName) elements.opponentInfoName.textContent = opponentName;
+        if (elements.opponentInfoAvatar) elements.opponentInfoAvatar.src = `img/${opponentAvatarFromStorage}.jpg`;
+        updateModalPlayerInfo(myPlayerData.name, myPlayerData.avatar, opponentName, opponentAvatarFromStorage);
+        currentQuestionIndex = 0;
+        answers = [];
+        if (elements.myScore) elements.myScore.textContent = '0';
+        if (elements.opponentScore) elements.opponentScore.textContent = '0';
+        startCountdown();
+    }
+
+    function updateModalPlayerInfo(myName, myAvatar, opponentName, opponentAvatar) {
+        console.log('[DEBUG] Updating modal player info:', myName, myAvatar, opponentName, opponentAvatar);
+        const elementIds = ['myNameResult', 'myAvatarResult', 'opponentNameResult', 'opponentAvatarResult'];
+        elementIds.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                if (id === 'myNameResult' || id === 'opponentNameResult') {
+                    element.textContent = id === 'myNameResult' ? myName : opponentName;
+                } else if (id === 'myAvatarResult' || id === 'opponentAvatarResult') {
+                    element.src = `img/${id === 'myAvatarResult' ? myAvatar : opponentAvatar}.jpg`;
+                }
+            }
+        });
+    }
+
+    function startCountdown() {
+        console.log('[DEBUG] Starting countdown');
+        if (!elements.countdownDisplay || isGameStarted) return;
+
+        isGameStarted = false;
+        currentQuestionIndex = 0;
+
+        if (elements.question) {
+            elements.question.textContent = 'Waiting for game to start...';
+        }
+        const questionImage = document.getElementById('questionImage');
+        if (questionImage) {
+            questionImage.style.display = 'none';
+        }
+        const buttons = document.querySelectorAll('.answer-btn');
+        buttons.forEach(btn => {
+            btn.style.display = 'none';
+            btn.disabled = true;
+        });
+
+        // send message to server to start countdown
+        socket.emit('readyToStart', { match_id });
+        elements.countdownDisplay.textContent = 'Waiting for all players...';
+
+        // timer
+        socket.once('startCountdown', () => {
+            console.log('[DEBUG] Received startCountdown signal');
+            let countdown = 5;
+            elements.countdownDisplay.textContent = `Game starts in ${countdown} seconds...`;
+
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    elements.countdownDisplay.textContent = `Game starts in ${countdown} seconds...`;
+                } else {
+                    clearInterval(interval);
+                    elements.countdownDisplay.textContent = 'Waiting for server confirmation...';
+                }
+            }, 1000);
+        });
+
+        socket.once('startConfirmed', () => {
+            console.log('[DEBUG] Received startConfirmed signal');
+            elements.countdownDisplay.textContent = 'Game in Progress';
+            isGameStarted = true;
+        });
+      
+        setTimeout(() => {
+            if (!isGameStarted) {
+                elements.countdownDisplay.textContent = 'Server not responding, please refresh...';
+            }
+        }, 10000);
+    }
+
+    function initGame() {
+        console.log('[DEBUG] Initializing game');
+        if (isGameStarted) {
+            console.log('[DEBUG] Game already started, skipping initialization');
+            return;
+        }
+
+        match_id = localStorage.getItem('match_id');
+        console.log('[DEBUG] Retrieved match_id from localStorage:', match_id);
+        
+        if (!match_id) {
+            console.error('No match_id found');
+            window.location.href = 'match_page.html';
+            return;
+        }
+
+        if (elements.question) {
+            elements.question.textContent = 'Waiting for game to start...';
+        }
+        const questionImage = document.getElementById('questionImage');
+        if (questionImage) {
+            questionImage.style.display = 'none';
+        }
+        const buttons = document.querySelectorAll('.answer-btn');
+        buttons.forEach(btn => {
+            btn.style.display = 'none';
+            btn.disabled = true;
+        });
+
+        startCountdown();
+    }
+
+    function setupEventListeners() {
+        console.log('[DEBUG] Setting up event listeners');
+        const buttons = document.querySelectorAll('.answer-btn');
+        buttons.forEach(btn => {
+            btn.onclick = () => submitAnswer(btn.textContent);
+        });
+    }
+
+    function loadQuestion(index) {
+        console.log('[DEBUG] LoadQuestion called with index:', index, 'isGameStarted:', isGameStarted);
+        
+        if (!isGameStarted) {
+            console.log('[DEBUG] Game not started yet, ignoring loadQuestion call');
+            return;
+        }
+
+        const feedback = document.getElementById('answerFeedback');
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+        if (elements.progressText) {
+            elements.progressText.textContent = `Question ${index + 1}/5`;
+        }
+
+        if (elements.question) {
+            elements.question.textContent = 'Loading question...';
+        }
+        
+        const questionImage = document.getElementById('questionImage');
+        if (questionImage) {
+            questionImage.style.display = 'none';
+        }
+
+        const buttons = document.querySelectorAll('.answer-btn');
+        buttons.forEach(btn => {
+            btn.style.display = 'none';
+            btn.disabled = true;
+        });
+
+        socket.emit('requestQuestion', {
+            match_id,
+            questionIndex: index
+        });
+    }
+
+    function submitAnswer(answer, correctAnswer) {
+        if (!isGameStarted) return;
+        
+        const buttons = document.querySelectorAll('.answer-btn');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+        });
+        
+        const time = Date.now();
+        console.log('[DEBUG] Submitting answer:', {
+            match_id,
+            questionIndex: currentQuestionIndex,
+            answer,
+            time
+        });
+
+        answers.push({
+            questionIndex: currentQuestionIndex,
+            answer,
+            time
+        });
+
+        socket.emit('submitAnswer', {
+            match_id,
+            questionIndex: currentQuestionIndex,
+            answer,
+            playerName: myPlayerData.name,
+            time
+        });
+    }
+
+    function showAnswerFeedback(isCorrect) {
+        console.log('[DEBUG] Showing answer feedback:', isCorrect);
+        const feedback = document.getElementById('answerFeedback');
+        if (feedback) {
+            feedback.textContent = isCorrect ? 'Correct!' : 'Incorrect!';
+            feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedback.style.display = 'block';
+            setTimeout(() => {
+                if (feedback) feedback.style.display = 'none';
+            }, 2000);
+        }
+    }
+
+    function handleGameEnd() {
+        console.log('[DEBUG] Handling game end');
+        if (gameEndTimeout) {
+            clearTimeout(gameEndTimeout);
+            gameEndTimeout = null;
+        }
+        
+        // Clear match data when game ends
+        localStorage.removeItem('match_id');
+        localStorage.removeItem('currentRoomId');
+        
+        if (myPlayerData && opponentName) {
+            const myScore = calculateLocalScore();
+            const opponentScore = 0;
+
+            if (elements.loadingSpinner) elements.loadingSpinner.style.display = 'none';
+            if (elements.scoreDisplay) elements.scoreDisplay.style.display = 'block';
+
+            const scores = {
+                [myPlayerData.name]: myScore,
+                [opponentName]: opponentScore
+            };
+            
+            let resultMessage;
+            let headerClass;
+            
+            if (myScore > opponentScore) {
+                resultMessage = 'You Win!';
+                headerClass = 'win';
+            } else if (myScore < opponentScore) {
+                resultMessage = 'You Lose!';
+                headerClass = 'lose';
+            } else {
+                resultMessage = "It's a Tie!";
+                headerClass = 'tie';
+            }
+
+            if (elements.modalTitle) elements.modalTitle.textContent = resultMessage;
+            if (elements.modalHeader) elements.modalHeader.className = `modal-header ${headerClass}`;
+
+            showResultModal(resultMessage, scores);
+        }
+        
+        if (elements.countdownDisplay) {
+            elements.countdownDisplay.textContent = 'Game Over';
+        }
+    }
+
+    function handleOpponentDisconnected(data) {
+        console.log('[DEBUG] Opponent disconnected:', data);
+        alert(`${data.name} has disconnected. Waiting for reconnection...`);
+        isGamePaused = true;
+        updateGameStatus('Opponent disconnected, waiting...');
+    }
+
+    function handleOpponentReconnected(data) {
+        console.log('[DEBUG] Opponent reconnected:', data);
+        alert(`${data.name} has reconnected!`);
+        if (isGamePaused) {
+            isGamePaused = false;
+            updateGameStatus('Game resuming');
+            if (currentQuestionIndex < 5) {
+                loadQuestion(currentQuestionIndex);
+            }
+        }
+    }
+
+    function handleRoomClosed(data) {
+        console.log('[DEBUG] Room closed:', data);
+        localStorage.removeItem('currentRoomId');
+        let message = 'Room has been closed';
+        if (data.reason === 'reconnectTimeout') {
+            message = `${data.opponentLeft} failed to reconnect in time, room closed`;
+        }
+        alert(message);
+        window.location.href = 'root.html';
+    }
+
+    function showDefaultResultModal() {
+        console.log('[DEBUG] Showing default result modal');
+        if (elements.modalHeader) elements.modalHeader.className = 'modal-header timeout';
+        if (elements.modalTitle) elements.modalTitle.textContent = 'Connection Timeout';
+        if (elements.resultMessage) elements.resultMessage.textContent = 'Unable to get server results, showing local results';
+        if (elements.loadingSpinner) elements.loadingSpinner.style.display = 'none';
+        const myLocalScore = calculateLocalScore();
+        if (elements.scoreDisplay) elements.scoreDisplay.style.display = 'block';
+        if (elements.yourFinalScore) elements.yourFinalScore.textContent = myLocalScore;
+        if (elements.opponentFinalScore) elements.opponentFinalScore.textContent = 'N/A';
+        if (elements.countdownDisplay) {
+            elements.countdownDisplay.textContent = 'Match Finished';
+        }
+        if (elements.resultModal) elements.resultModal.style.display = 'block';
+    }
+
+    function calculateLocalScore() {
+        console.log('[DEBUG] Calculating local score with answers:', answers);
+        if (!answers || answers.length === 0) return 0;
+        const correctAnswers = answers.filter(a => a.isCorrect === true);
+        return correctAnswers.length * 10;
+    }
+
+    function setupModalEventListeners() {
+        console.log('[DEBUG] Setting up modal event listeners');
+        if (elements.closeModal) {
+            elements.closeModal.addEventListener('click', () => {
+                if (elements.resultModal) elements.resultModal.style.display = 'none';
+                window.location.href = 'root.html';
+            });
+        }
+        window.addEventListener('click', (event) => {
+            if (elements.resultModal && event.target === elements.resultModal) {
+                elements.resultModal.style.display = 'none';
+                window.location.href = 'root.html';
+            }
+        });
+        if (elements.btnRematch) {
+            elements.btnRematch.addEventListener('click', () => {
+                localStorage.removeItem('currentRoomId');
+                if (elements.resultModal) elements.resultModal.style.display = 'none';
+                window.location.href = 'match_page.html';
+            });
+        }
+        if (elements.btnExit) {
+            elements.btnExit.addEventListener('click', () => {
+                localStorage.removeItem('currentRoomId');
+                if (elements.resultModal) elements.resultModal.style.display = 'none';
+                window.location.href = 'root.html';
+            });
+        }
+        if (elements.closeOfflineModal) {
+            elements.closeOfflineModal.addEventListener('click', () => {
+                if (elements.offlineModal) elements.offlineModal.style.display = 'none';
+            });
+        }
+        if (elements.btnTryReconnect) {
+            elements.btnTryReconnect.addEventListener('click', () => {
+                if (socket) {
+                    socket.connect();
+                }
+            });
+        }
+    }
+
+    function showConnectionStatus(message) {
+        console.log('[DEBUG] Showing connection status:', message);
+        let statusDiv = document.getElementById('connectionStatus');
+        if (!statusDiv) {
+            statusDiv = document.createElement('div');
+            statusDiv.id = 'connectionStatus';
+            statusDiv.className = 'connection-status';
+            document.body.appendChild(statusDiv);
+        }
+        statusDiv.textContent = message;
+    }
+
+    function hideConnectionStatus() {
+        console.log('[DEBUG] Hiding connection status');
+        const statusDiv = document.getElementById('connectionStatus');
+        if (statusDiv) {
+            statusDiv.remove();
+        }
+    }
+
+    function showOfflineModal() {
+        console.log('[DEBUG] Showing offline modal');
+        if (elements.offlineModal) elements.offlineModal.style.display = 'block';
+    }
+
+    function hideOfflineModal() {
+        console.log('[DEBUG] Hiding offline modal');
+        if (elements.offlineModal) elements.offlineModal.style.display = 'none';
+    }
+
+    function updateGameStatus(message) {
+        console.log('[DEBUG] Updating game status:', message);
+        if (elements.countdownDisplay) {
+            elements.countdownDisplay.textContent = message;
+        }
+    }
+
+    function showExitGameModal(callback) {
+        const modal = document.getElementById('exitGameModal');
+        modal.style.display = 'block';
+        
+        // store callback
+        window.exitGameCallback = callback || null;
+    }
+
+    document.getElementById('confirmExitBtn').addEventListener('click', () => {
+        handleExit(() => {
+            if (typeof window.exitGameCallback === 'function') {
+                window.exitGameCallback();
+                window.exitGameCallback = null;
+            }
+        });
+        document.getElementById('exitGameModal').style.display = 'none';
+    });
+
+    document.getElementById('cancelExitBtn').addEventListener('click', () => {
+        document.getElementById('exitGameModal').style.display = 'none';
+        window.exitGameCallback = null;
+    });
+
+    document.getElementById('exitGameModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('exitGameModal')) {
+            e.target.style.display = 'none';
+            window.exitGameCallback = null;
+        }
+    });
+
+    function handleExit(callback) {
+        if (socket && socket.connected && match_id) {
+            socket.emit('leaveGame', {
+                match_id,
+                playerName: myPlayerData.name
+            });
+            socket.disconnect();
+        }
+        
+        localStorage.removeItem('match_id');
+        localStorage.removeItem('currentRoomId');
+        localStorage.removeItem('opponentName');
+        
+        if (typeof callback === 'function') {
+            callback();
+        } else {
+            window.location.href = 'root.html';
+        }
+    }
+
+    function showResultModal(message, scores, allAnswers) {
+        if (elements.modalTitle) {
+            elements.modalTitle.textContent = message;
+        }
+        
+        const myNameResult = document.getElementById('myNameResult');
+        const myAvatarResult = document.getElementById('myAvatarResult');
+        const opponentNameResult = document.getElementById('opponentNameResult');
+        const opponentAvatarResult = document.getElementById('opponentAvatarResult');
+        
+        if (myNameResult) {
+            myNameResult.textContent = myPlayerData.name;
+        }
+        if (myAvatarResult) {
+            myAvatarResult.src = `img/${myPlayerData.avatar}.jpg`;
+        }
+        if (opponentNameResult && opponentName) {
+            opponentNameResult.textContent = opponentName;
+        }
+        if (opponentAvatarResult) {
+            const opponentAvatarFromStorage = localStorage.getItem('opponentAvatar') || 'girl_ava';
+            opponentAvatarResult.src = `img/${opponentAvatarFromStorage}.jpg`;
+        }
+        if (scores) {
+            if (elements.loadingSpinner) {
+                elements.loadingSpinner.style.display = 'none';
+            }
+            if (elements.scoreDisplay) {
+                elements.scoreDisplay.style.display = 'block';
+            }
+            if (elements.yourFinalScore) {
+                elements.yourFinalScore.textContent = scores[myPlayerData.name] || 0;
+            }
+            if (elements.opponentFinalScore) {
+                elements.opponentFinalScore.textContent = scores[opponentName] || 0;
+            }
+        }
+        if (elements.resultModal) {
+            elements.resultModal.style.display = 'block';
+        }
+    }
+
+    function showOpponentLeftModal(playerName, reason, callback) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        
+        const content = document.createElement('div');
+        content.className = 'modal-content';
+        
+        const header = document.createElement('div');
+        header.className = 'modal-header';
+        header.innerHTML = '<h2>Opponent Left</h2>';
+        
+        const body = document.createElement('div');
+        body.className = 'modal-body';
+        body.innerHTML = `<p>${playerName} has left the game. The match will be terminated.</p>`;
+        
+        const footer = document.createElement('div');
+        footer.className = 'modal-footer';
+        
+        const okButton = document.createElement('button');
+        okButton.className = 'btn';
+        okButton.textContent = 'OK';
+        okButton.onclick = () => {
+            modal.remove();
+            if (typeof callback === 'function') {
+                callback();
+            }
+        };
+        
+        footer.appendChild(okButton);
+        content.appendChild(header);
+        content.appendChild(body);
+        content.appendChild(footer);
+        modal.appendChild(content);
+        
+        document.body.appendChild(modal);
+    }
+
+    function setupNavigationListeners() {
+        document.querySelector('a[href="root.html"]').addEventListener('click', (e) => {
+            handleNavigationClick(e, 'root.html');
+        });
+
+        document.querySelector('a[href="about.html"]').addEventListener('click', (e) => {
+            handleNavigationClick(e, 'about.html');
+        });
+    }
+
+    function setupSocketEventListeners(socket) {
+        socket.on('opponentLeft', (data) => {
+            console.log('[DEBUG] Opponent left:', data);
+            const { playerName, reason } = data;
+
+            isGamePaused = true;
+
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+            });
+
+            if (elements.countdownDisplay) {
+                elements.countdownDisplay.textContent = 'Opponent has left the game';
+            }
+
+            const existingModal = document.querySelector('.opponent-left-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            const modal = document.createElement('div');
+            modal.className = 'modal opponent-left-modal';
+            modal.style.cssText = `
+                display: block;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.4);
+            `;
+            
+            const content = document.createElement('div');
+            content.className = 'modal-content';
+            content.style.cssText = `
+                background-color: #8A2BE2;
+                margin: 15% auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%;
+                max-width: 500px;
+                border-radius: 10px;
+                text-align: center;
+                color: white;
+            `;
+            
+            content.innerHTML = `
+                <div class="modal-header">
+                    <h2>Opponent Left</h2>
+                </div>
+                <div class="modal-body">
+                    <p>${playerName} has left the game. The game will end in 3 seconds.</p>
+                </div>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            setTimeout(() => {
+                // clear
+                localStorage.removeItem('match_id');
+                localStorage.removeItem('currentRoomId');
+                localStorage.removeItem('opponentName');
+                window.location.href = 'root.html';
+            }, 3000);
+        });
+
+        socket.on('loadQuestion', (data) => {
+            if (isGamePaused) {
+                return;
+            }
+            
+            console.log('[DEBUG] Received question data:', data);
+            const { questionIndex, question } = data;
+
+            if (!isGameStarted) {
+                console.log('[DEBUG] Game not started, ignoring question data');
+                return;
+            }
+
+            if (!question || !question.text || !question.options || question.options.length === 0) {
+                console.error('[ERROR] Invalid question data format');
+                return;
+            }
+
+            if (elements.question) {
+                elements.question.textContent = question.text;
+            }
+
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach((btn, i) => {
+                if (i < question.options.length) {
+                    btn.textContent = question.options[i];
+                    btn.disabled = false;
+                    btn.style.display = 'block';
+                    btn.onclick = () => submitAnswer(question.options[i], question.answer);
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+
+            const questionImage = document.getElementById('questionImage');
+            if (questionImage && question.image) {
+                questionImage.src = question.image;
+                questionImage.alt = `Question ${questionIndex + 1} image`;
+                questionImage.style.display = 'block';
+                questionImage.onload = () => {
+                    if (questionImage) questionImage.classList.add('loaded');
+                };
+                questionImage.onerror = () => {
+                    if (questionImage) questionImage.style.display = 'none';
+                };
+            }
+        });
+
+        window.addEventListener('beforeunload', function(e) {
+            if (isGameStarted && socket && socket.connected && match_id) {
+                socket.emit('leaveGame', {
+                    match_id,
+                    playerName: myPlayerData.name
+                });
+            }
+        });
+    }
+</script>    
+</body>
+
+</html>

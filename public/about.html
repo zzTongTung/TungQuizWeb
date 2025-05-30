@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>about</title>
+    <link rel="stylesheet" href="about_style.css">
+</head>
+
+<body class="bg">
+    <!-- header -->
+    <header id="header">
+        <a href="#header" class="logo">My Website</a>
+        <ul>
+            <li><a href="root.html">Back to Home</a></li>
+        </ul>
+    </header>
+
+    <nav class="sidebar">
+        <ul>
+            <li><a href="#Activities">Student Activities</a></li>
+            <li><a href="#Course">Course assignment</a></li>
+            <li><a href="#Awards">Awards</a></li>
+            <li><a href="#Skills">Skills</a></li>
+        </ul>
+    </nav>
+
+    <div class="content">
+        <div class="profile">
+            <img src="img/author-avatar.jpg" alt="avatar">
+            <h2>TUNG</h2>
+            <h3><span>personalized signature:</span>
+                <span>Rejoice in every single day!</span>
+                <br><span>phone number:</span>
+                <span>13724148588</span>
+                <br><span>email address:</span>
+                <span>2904317537@qq.com</span>
+            </h3>
+        </div>
+
+        <section id="Activities">
+            <h1>Student Activities</h1>
+            <div class="image-slider" id="interestSlider">
+                <div class="slider-container">
+                    <img src="img/about_page_image/person1.jpg" alt="Interest 1">
+                    <img src="img/about_page_image/person2.jpg" alt="Interest 2">
+                    <img src="img/about_page_image/person3.jpg" alt="Interest 3">
+                    <img src="img/about_page_image/person4.jpg" alt="Interest 4">
+                    <img src="img/about_page_image/person5.jpg" alt="Interest 5">
+                </div>
+                <button class="slider-control prev-btn" onclick="prevSlide('interestSlider')">&lt;</button>
+                <button class="slider-control next-btn" onclick="nextSlide('interestSlider')">&gt;</button>
+                <div class="slider-dots" id="interestDots"></div>
+            </div>
+            <div class="student-work">
+                <h2>Student Leadership Experience</h2>
+
+                <div class="work-item">
+                    <div class="work-title">XinXin Volunteer Teaching Service Team (2023-2024)</div>
+                    <ul class="work-details">
+                        <li>Member of the Teaching Group</li>
+                        <li>Responsibilities: Designed and delivered educational programs for underprivileged children</li>
+                        <li>Organized community outreach activities focusing on education equality</li>
+                    </ul>
+                </div>
+
+                <div class="work-item">
+                    <div class="work-title">Central Department of the University Youth League Committee (2023-2024)</div>
+                    <ul class="work-details">
+                        <li>Administrative Assistant</li>
+                        <li>Assisted in organizing campus-wide events and student leadership training programs</li>
+                        <li>Managed communication between student organizations and university administration</li>
+                    </ul>
+                </div>
+
+                <div class="work-item">
+                    <div class="work-title">XinXin Volunteer Teaching Service Team (2024-2025)</div>
+                    <ul class="work-details">
+                        <li>Team Leader</li>
+                        <li>Oversaw team operations, including recruitment, training, and project planning</li>
+                        <li>Led a team of 30 volunteers to implement sustainable teaching projects</li>
+                        <li>Established partnerships with local schools to expand service reach</li>
+                    </ul>
+                </div>
+
+                <div class="work-item">
+                    <div class="work-title">Aberdeen College Building Assistant (2024-2025)</div>
+                    <ul class="work-details">
+                        <li>Student Advisor & Administrative Assistant</li>
+                        <li>Provided academic and lifestyle guidance to freshmen</li>
+                        <li>duty scheduling for student staff in the building</li>
+                        <li>Organized weekly meetings and maintained detailed records</li>
+                        <li>organized documents for academic programs and student activities</li>
+                        <li>Supported logistics and coordination for major events</li>
+                        <li>Assisted in the management of IT projects to improve student services</li>
+                        <li>Collaborated with faculty to address student needs and concerns</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="Course">
+            <h1>Course assignment</h1>
+            <div class="full-width-image">
+                <img src="img/about_page_image/class_graph.png" alt="Skill Image">
+            </div>
+        </section>
+
+        <section id="Awards">
+            <h1>Awards</h1>
+            <div class="award-container">
+                <img src="img/about_page_image/prize1.png" alt="Award 1" class="award-img">
+                <img src="img/about_page_image/prize2.png" alt="Award 2" class="award-img">
+            </div>
+            <ul class="award-list">
+                <li>Provincial Second Prize - 2024 National College Students' Mathematical Modeling Competition</li>
+                <li>First Prize - 2024 The 9th Shuwei Cup College Students' Mathematical Modeling Challenge</li>
+            </ul>
+        </section>
+
+        <section id="Skills">
+            <h1>Skills</h1>
+            <div class="skill-progress programming">
+                <h4>Programming Languages</h4>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="90%">MATLAB (90%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="85%">Python (85%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="75%">Java (75%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="80%">SQL (80%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="70%">HTML/CSS (70%)</div>
+                </div>
+            </div>
+
+            <div class="skill-progress design">
+                <h4>Design & Multimedia</h4>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="95%">Photoshop (95%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="85%">Premiere Pro (85%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="80%">After Effects (80%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="90%">Procreate (90%)</div>
+                </div>
+            </div>
+
+            <div class="skill-progress tools">
+                <h4>Tools & Systems</h4>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="85%">phpMyAdmin (85%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="75%">Windows/Linux (75%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="70%">Assembly Language (70%)</div>
+                </div>
+            </div>
+
+            <div class="skill-progress language">
+                <h4>Language Skills</h4>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="80%">English (IELTS 6.0) (80%)</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" data-value="100%">Chinese (Native) (100%)</div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            initSlider('interestSlider');
+            initProgressBars();
+        });
+
+        function initSlider(sliderId) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            
+            const container = slider.querySelector('.slider-container');
+            const images = container.querySelectorAll('img');
+            const totalImages = images.length;
+            let currentIndex = 0;
+
+            // guides
+            const dotsContainer = slider.querySelector(`#${sliderId.replace('Slider', 'Dots')}`);
+            for (let i = 0; i < totalImages; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(i, sliderId));
+                dotsContainer.appendChild(dot);
+            }
+
+            function updateSlider() {
+                container.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                const dots = dotsContainer.querySelectorAll('.dot');
+                dots.forEach((dot, index) => {
+                    if (index === currentIndex) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+
+            let interval = setInterval(() => {
+                currentIndex = (currentIndex + 1) % totalImages;
+                updateSlider();
+            }, 5000);
+
+            slider.addEventListener('mouseenter', () => {
+                clearInterval(interval);
+            });
+
+            slider.addEventListener('mouseleave', () => {
+                interval = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % totalImages;
+                    updateSlider();
+                }, 5000);
+            });
+        }
+
+        function prevSlide(sliderId) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            
+            const container = slider.querySelector('.slider-container');
+            const images = container.querySelectorAll('img');
+            const totalImages = images.length;
+            let currentIndex = 0;
+            
+            const transformValue = container.style.transform;
+            if (transformValue) {
+                const match = transformValue.match(/-?\d+/);
+                if (match) {
+                    currentIndex = Math.abs(parseInt(match[0])) / 100;
+                }
+            }
+            
+            currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+            container.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+            const dotsContainer = slider.querySelector(`#${sliderId.replace('Slider', 'Dots')}`);
+            const dots = dotsContainer.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                if (index === currentIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function nextSlide(sliderId) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            
+            const container = slider.querySelector('.slider-container');
+            const images = container.querySelectorAll('img');
+            const totalImages = images.length;
+            let currentIndex = 0;
+            
+            const transformValue = container.style.transform;
+            if (transformValue) {
+                const match = transformValue.match(/-?\d+/);
+                if (match) {
+                    currentIndex = Math.abs(parseInt(match[0])) / 100;
+                }
+            }
+            
+            currentIndex = (currentIndex + 1) % totalImages;
+            container.style.transform = `translateX(-${currentIndex * 100}%)`;
+            
+            const dotsContainer = slider.querySelector(`#${sliderId.replace('Slider', 'Dots')}`);
+            const dots = dotsContainer.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                if (index === currentIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function goToSlide(index, sliderId) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            
+            const container = slider.querySelector('.slider-container');
+            container.style.transform = `translateX(-${index * 100}%)`;
+            
+            const dotsContainer = slider.querySelector(`#${sliderId.replace('Slider', 'Dots')}`);
+            const dots = dotsContainer.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        // skill
+        function initProgressBars() {
+            const progressValues = document.querySelectorAll('.progress-value');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const value = entry.target.getAttribute('data-value');
+                        entry.target.style.width = value;
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            progressValues.forEach(bar => {
+                observer.observe(bar);
+            });
+        }
+    </script>
+</body>
+
+</html>

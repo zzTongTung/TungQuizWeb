@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Page</title>
+    <link rel="stylesheet" href="match_page_style.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="challenge-label">
+        Select a opponent
+    </div>
+    <div class="user-list-container" id="userListContainer"></div>
+
+    <!-- challenge modal -->
+    <div id="challengeModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Challenge Request</h2>
+            </div>
+            <div class="modal-body">
+                <p id="challengerName"></p>
+                <p>has challenged you to a quiz! Do you accept?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="acceptBtn" class="modal-btn accept">Accept</button>
+                <button id="rejectBtn" class="modal-btn reject">Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let myPlayerData;
+        let currentChallenger = null;
+        let playerList = [];
+
+        function getMyPlayerData() {
+            const existingData = JSON.parse(localStorage.getItem('playerData')) || [];
+            return existingData[existingData.length - 1];
+        }
+
+        function clearPlayerList() {
+            const userListContainer = document.getElementById('userListContainer');
+            userListContainer.innerHTML = '';
+        }
+
+        function renderPlayerList(playerList) {
+            const userListContainer = document.getElementById('userListContainer');
+            userListContainer.innerHTML = '';
+
+            playerList.forEach(user => {
+                if (user.name !== myPlayerData.name) {
+                    // info
+                    const userInfoDiv = document.createElement('div');
+                    userInfoDiv.classList.add('user-info');
+
+                    // ava part
+                    const avatarDiv = document.createElement('div');
+                    avatarDiv.classList.add('user-avatar');
+                    const imgPath = `img/${user.avatar}.jpg`;
+                    const img = new Image();
+                    img.src = imgPath;
+                    img.onload = function () {
+                        avatarDiv.style.backgroundImage = `url('${imgPath}')`;
+                    };
+                    img.onerror = function () {
+                        avatarDiv.style.backgroundImage = 'url(img/default_avatar.jpg)';
+                    };
+
+                    // name part
+                    const nameDiv = document.createElement('div');
+                    nameDiv.classList.add('user-name');
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = user.name;
+                    nameDiv.appendChild(nameSpan);
+
+                    // desc part
+                    const descDiv = document.createElement('div');
+                    descDiv.classList.add('user-desc');
+                    const descSpan = document.createElement('span');
+                    let descValue = user.desc;
+                    if (typeof descValue === 'object') {
+                        descValue = JSON.stringify(descValue).replace(/[\{\}]/g, '');
+                    }
+                    descSpan.textContent = descValue || '';
+                    descDiv.appendChild(descSpan);
+
+                    // button part
+                    const challengeButton = document.createElement('button');
+                    challengeButton.classList.add('challenge-button');
+                    challengeButton.textContent = 'challenge';
+                    challengeButton.addEventListener('click', () => {
+                        socket.emit('challenge', user.name);
+                    });
+
+                    userInfoDiv.appendChild(avatarDiv);
+                    userInfoDiv.appendChild(nameDiv);
+                    userInfoDiv.appendChild(descDiv);
+                    userInfoDiv.appendChild(challengeButton);
+                    userListContainer.appendChild(userInfoDiv);
+                }
+            });
+        }
+
+        window.onload = function () {
+            myPlayerData = getMyPlayerData();
+            if (!myPlayerData) {
+                console.error('playerData not found');
+                return;
+            }
+
+            socket.on('updatePlayerList', (newPlayerList) => {
+                playerList = newPlayerList;
+                renderPlayerList(playerList);
+                console.log('playerList updated:', playerList);
+            });
+
+            socket.emit('playerOnline', myPlayerData);
+
+            socket.on('challengeReceived', (challenger) => {
+                currentChallenger = challenger;
+                document.getElementById('challengerName').textContent = challenger;
+                document.getElementById('challengeModal').style.display = 'block';
+            });
+
+            // accept challenge
+            document.getElementById('acceptBtn').addEventListener('click', () => {
+                if (currentChallenger) {
+                    const opponentData = playerList.find(player => player.name === currentChallenger);
+                    if (opponentData) {
+                        localStorage.setItem('opponentAvatar', opponentData.avatar);
+                        localStorage.setItem('opponentName', opponentData.name);
+                        console.log('Opponent data saved:', opponentData);
+                    }
+                    socket.emit('challengeResponse', 'accept', currentChallenger);
+                    document.getElementById('challengeModal').style.display = 'none';
+                    window.location.href = 'quiz_game.html';
+                }
+            });
+
+            // reject challenge
+            document.getElementById('rejectBtn').addEventListener('click', () => {
+                if (currentChallenger) {
+                    socket.emit('challengeResponse', 'reject', currentChallenger);
+                    document.getElementById('challengeModal').style.display = 'none';
+                }
+            });
+
+            // receive challenge response
+            socket.on('challengeRejected', (rejecterName) => {
+                alert(`${rejecterName} rejected your challenge!`);
+            });
+
+            socket.on('matchSuccess', (data) => {
+                console.log('Match success:', data);
+                const { match_id, opponent, isChallenger } = data;
+
+                localStorage.setItem('match_id', match_id);
+                localStorage.setItem('opponentName', opponent);
+
+                window.location.href = 'quiz_game.html';
+            });
+        };
+
+        window.onunload = function () {
+            //localStorage.removeItem('playerData');
+            socket.emit('playerOffline');
+        };
+    </script>
+</body>
+
+</html>
